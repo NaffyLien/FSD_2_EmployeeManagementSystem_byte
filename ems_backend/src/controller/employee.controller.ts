@@ -69,6 +69,15 @@ export const deleteEmployee = async (request: Request, response: Response) => {
   const id = getEmployeeId(request, response);
   if (id === null) return;
 
-  await employeeService.deleteEmployee(id);
-  response.status(204).send();
+  try {
+    const result = await employeeService.deleteEmployee(id);
+    if (!result) {
+      response.status(404).json({ message: "Employee not found" });
+      return;
+    }
+    response.status(204).send();
+  } catch (error) {
+    console.error("Failed to delete employee:", error);
+    response.status(500).json({ message: "Failed to delete employee" });
+  }
 };

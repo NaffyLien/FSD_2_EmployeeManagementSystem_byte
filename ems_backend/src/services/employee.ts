@@ -29,12 +29,21 @@ class EmployeeService {
     })
   }
 
-  async deleteEmployee(id: Number) {
-    return prismaClient.employee.delete({
-      where: {
-        id: Number(id)
+  async deleteEmployee(id: number) {
+    try {
+      return await prismaClient.employee.delete({
+        where: {
+          id: Number(id)
+        }
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          return null;
+        }
       }
-    })
+      throw error;
+    }
   }
 }
 
