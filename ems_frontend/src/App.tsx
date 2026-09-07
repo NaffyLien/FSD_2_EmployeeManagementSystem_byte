@@ -3,7 +3,7 @@ import { AdminLayout } from './layouts/AdminLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { ProtectedRoute } from './hooks/useAuth'
 import { LoginForm, useLogin } from './features/auth'
-import { EmployeeList, useEmployees } from './features/dashboard'
+import { HomePage, EmployeeList, useEmployees } from './features/dashboard'
 
 function DashboardPage() {
   const { employees, loading, error, reload, updateEmployee, removeEmployee } =
@@ -41,12 +41,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<HomePage />} />
+
         <Route path="/login" element={<AuthLayout />}>
           <Route index element={<LoginPage />} />
         </Route>
 
         <Route
-          path="/"
+          path="/employees"
           element={
             <ProtectedRoute>
               <AdminLayout />
@@ -54,7 +56,6 @@ function App() {
           }
         >
           <Route index element={<DashboardPage />} />
-          <Route path="employees" element={<DashboardPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

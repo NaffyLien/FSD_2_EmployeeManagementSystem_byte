@@ -29,15 +29,6 @@ export function AdminLayout() {
           <p className="text-xs text-slate-400 mt-1"><span className="hidden md:inline">Admin Panel</span></p>
         </div>
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-          <Link to="/" className={linkClass('/')}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-            </svg>
-            <span className="hidden md:inline">Dashboard</span>
-          </Link>
           <Link to="/employees" className={linkClass('/employees')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
