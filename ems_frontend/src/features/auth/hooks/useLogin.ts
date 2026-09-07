@@ -31,7 +31,7 @@ export function useLogin() {
         localStorage.setItem('ems_token', response.token)
         localStorage.setItem('ems_user', JSON.stringify(fakeUser))
         loginAction(response.token, fakeUser)
-        navigate('/', { replace: true })
+        navigate('/employees', { replace: true })
       } catch (err: unknown) {
         const message =
           err instanceof Error

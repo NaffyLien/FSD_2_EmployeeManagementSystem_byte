@@ -2,40 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AdminLayout } from './layouts/AdminLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { ProtectedRoute } from './hooks/useAuth'
-import { LoginForm, useLogin } from './features/auth'
-import { HomePage, EmployeeList, useEmployees } from './features/dashboard'
-
-function DashboardPage() {
-  const { employees, loading, error, reload, updateEmployee, removeEmployee } =
-    useEmployees()
-
-  return (
-    <EmployeeList
-      employees={employees}
-      loading={loading}
-      error={error}
-      onReload={reload}
-      onUpdated={updateEmployee}
-      onDeleted={removeEmployee}
-    />
-  )
-}
-
-function LoginPage() {
-  const { email, setEmail, password, setPassword, error, loading, handleSubmit } = useLogin()
-
-  return (
-    <LoginForm
-      onSubmit={handleSubmit}
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      error={error}
-      loading={loading}
-    />
-  )
-}
+import { HomePage } from './features/dashboard'
+import { DashboardPage } from './features/dashboard/components/DashboardPage'
+import { LoginPage } from './features/auth/components/LoginPage'
 
 function App() {
   return (
