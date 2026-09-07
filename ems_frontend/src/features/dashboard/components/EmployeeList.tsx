@@ -3,6 +3,7 @@ import { Button } from '../../../components/Button/Button.tsx'
 import { Modal } from '../../../components/Modal/Modal.tsx'
 import { EmployeeForm } from './EmployeeForm'
 import { DeleteModal } from './DeleteModal'
+import { deleteEmployee } from '../services/employeeApi.ts'
 import type { Employee } from '../../../utils/types.ts'
 
 interface EmployeeListProps {
@@ -12,6 +13,8 @@ interface EmployeeListProps {
   onReload: () => void
   onUpdated: (emp: Employee) => void
   onDeleted: (id: number) => void
+  onAdded: (emp: Employee) => void
+
 }
 
 export function EmployeeList({
@@ -19,6 +22,7 @@ export function EmployeeList({
   loading,
   error,
   onReload,
+  onAdded,
   onUpdated,
   onDeleted,
 }: EmployeeListProps) {
@@ -27,6 +31,7 @@ export function EmployeeList({
   const [modalOpen, setModalOpen] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null)
+  const [deleteError, setDeleteError] = useState('')
 
   const departments = useMemo(
     () => [...new Set(employees.map((e) => e.department))].sort(),
@@ -59,17 +64,31 @@ export function EmployeeList({
 
   const handleSaved = useCallback(
     (emp: Employee) => {
-      onUpdated(emp)
+      if (editingEmployee) {
+        onUpdated(emp)
+      } else {
+        onAdded(emp)
+      }
       setModalOpen(false)
       setEditingEmployee(null)
     },
-    [onUpdated]
+    [editingEmployee, onAdded, onUpdated]
   )
 
-  const handleDeleteConfirm = useCallback(() => {
-    if (deleteTarget) {
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return
+    setDeleteError('')
+    try {
+      await deleteEmployee(deleteTarget.id)
       onDeleted(deleteTarget.id)
       setDeleteTarget(null)
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+            'Failed to delete employee'
+      setDeleteError(message)
     }
   }, [deleteTarget, onDeleted])
 
@@ -203,13 +222,20 @@ export function EmployeeList({
         <EmployeeForm employee={editingEmployee} onSaved={handleSaved} onCancel={() => { setModalOpen(false); setEditingEmployee(null) }} />
       </Modal>
 
-      <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Confirm Delete" size="sm">
+      <Modal isOpen={!!deleteTarget} onClose={() => { setDeleteTarget(null); setDeleteError('') }} title="Confirm Delete" size="sm">
         {deleteTarget && (
-          <DeleteModal
-            employeeName={deleteTarget.name}
-            onConfirm={handleDeleteConfirm}
-            onCancel={() => setDeleteTarget(null)}
-          />
+          <>
+            {deleteError && (
+              <div className="mb-4 p-3 px-4 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm font-medium">
+                {deleteError}
+              </div>
+            )}
+            <DeleteModal
+              employeeName={deleteTarget.name}
+              onConfirm={handleDeleteConfirm}
+              onCancel={() => { setDeleteTarget(null); setDeleteError('') }}
+            />
+          </>
         )}
       </Modal>
     </div>
