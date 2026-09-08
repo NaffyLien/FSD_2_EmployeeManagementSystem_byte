@@ -20,6 +20,7 @@ Required environment variables:
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/employee_db"
 JWT_SECRET="replace-with-a-long-random-secret"
+JWT_REFRESH_SECRET="replace-with-a-different-long-random-secret"
 ```
 
 ### Authentication
@@ -33,11 +34,19 @@ JWT_SECRET="replace-with-a-long-random-secret"
 }
 ```
 
-The response contains a JWT token. Send it for protected operations:
+The response contains a short-lived access token and a refresh token. Send the access token for protected operations:
 
 ```http
 Authorization: Bearer <token>
 ```
+
+When the access token expires, send the refresh token to `POST /api/auth/refresh`:
+
+```json
+{ "refreshToken": "<refresh-token>" }
+```
+
+The response contains a new access token. Refresh tokens expire after seven days.
 
 ### Employee routes
 

@@ -9,11 +9,22 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+const refreshSchema = z.object({
+  refreshToken: z.string().min(1),
+});
+
+const createAccessToken = (adminId: number, secret: string) =>
+  jwt.sign({ sub: adminId, role: "admin", type: "access" }, secret, { expiresIn: "1h" });
+
+const createRefreshToken = (adminId: number, secret: string) =>
+  jwt.sign({ sub: adminId, role: "admin", type: "refresh" }, secret, { expiresIn: "7d" });
+
 export const login = async (request: Request, response: Response) => {
   const result = loginSchema.safeParse(request.body);
-  const secret = process.env.JWT_SECRET;
+  const accessSecret = process.env.JWT_SECRET;
+  const refreshSecret = process.env.JWT_REFRESH_SECRET;
 
-  if (!result.success || !secret) {
+  if (!result.success || !accessSecret || !refreshSecret) {
     response.status(400).json({ message: "Invalid login configuration or credentials" });
     return;
   }
@@ -27,6 +38,39 @@ export const login = async (request: Request, response: Response) => {
     return;
   }
 
-  const token = jwt.sign({ sub: admin.id, role: "admin" }, secret, { expiresIn: "1h" });
-  response.json({ token });
+  response.json({
+    token: createAccessToken(admin.id, accessSecret),
+    refreshToken: createRefreshToken(admin.id, refreshSecret),
+  });
+};
+
+export const refresh = async (request: Request, response: Response) => {
+  const result = refreshSchema.safeParse(request.body);
+  const accessSecret = process.env.JWT_SECRET;
+  const refreshSecret = process.env.JWT_REFRESH_SECRET;
+
+  if (!result.success || !accessSecret || !refreshSecret) {
+    response.status(400).json({ message: "Invalid refresh token configuration or request" });
+    return;
+  }
+
+  try {
+    const payload = jwt.verify(result.data.refreshToken, refreshSecret);
+
+    if (
+      typeof payload === "string" ||
+      payload.type !== "refresh" ||
+      payload.role !== "admin" ||
+      typeof payload.sub !== "string" ||
+      !Number.isInteger(Number(payload.sub)) ||
+      Number(payload.sub) <= 0
+    ) {
+      response.status(401).json({ message: "Invalid refresh token" });
+      return;
+    }
+
+    response.json({ token: createAccessToken(Number(payload.sub), accessSecret) });
+  } catch {
+    response.status(401).json({ message: "Invalid or expired refresh token" });
+  }
 };
