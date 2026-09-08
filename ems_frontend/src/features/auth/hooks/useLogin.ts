@@ -29,8 +29,9 @@ export function useLogin() {
         const response = await login({ email: email.trim(), password })
         const fakeUser: User = { id: 0, email: email.trim() }
         localStorage.setItem('ems_token', response.token)
+        localStorage.setItem('ems_refresh_token', response.refreshToken)
         localStorage.setItem('ems_user', JSON.stringify(fakeUser))
-        loginAction(response.token, fakeUser)
+        loginAction(response.token, response.refreshToken, fakeUser)
         navigate('/employees', { replace: true })
       } catch (err: unknown) {
         const message =

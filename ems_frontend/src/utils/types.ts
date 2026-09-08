@@ -19,6 +19,11 @@ export interface LoginPayload {
 
 export interface LoginResponse {
   token: string
+  refreshToken: string
+}
+
+export interface RefreshResponse {
+  token: string
 }
 
 export interface CreateEmployeePayload {
